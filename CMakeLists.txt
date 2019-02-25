@@ -11,7 +11,7 @@ set(OBD_MONITOR_VERSION
 project(OBD_MONITOR-${OBD_MONITOR_VERSION}
 		LANGUAGES C CXX)
 
-option(BUILD_CLIENT "Build the client"         OFF )
+option(BUILD_CLIENT "Build the client"         ON )
 option(BUILD_SIMULATOR "Build the simulator"   ON )
 
 find_package(Boost REQUIRED COMPONENTS system filesystem thread regex)

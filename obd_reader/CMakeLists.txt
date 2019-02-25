@@ -6,5 +6,5 @@ file(GLOB SRC
     "source/*.cpp"
 )
 
-add_executable(car_simulator ${SRC})
-target_link_libraries( car_simulator ${Boost_LIBRARIES} )
+add_executable(obd_reader ${SRC})
+target_link_libraries( obd_reader ${Boost_LIBRARIES} )
