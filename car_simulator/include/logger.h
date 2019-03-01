@@ -7,12 +7,16 @@
 #include <iostream>
 #include <string>
 
+
 namespace Log {
 
-class Logger{
-	public:
-		Logger(){};
-	 virtual void log(const std::string& s) = 0;
+class Logger {
+ public:
+  Logger(){};
+  virtual ~Logger(){};
+  Logger(const Logger&) = delete;             // non construction-copyable
+  Logger& operator=(const Logger&) = delete;  // non copyable
+  virtual void log(const std::string& s) = 0;
 };
 
 class FileLogger : public Logger {
@@ -35,7 +39,7 @@ class FileLogger : public Logger {
     }
   }
 
-  FileLogger(){
+  virtual ~FileLogger(){
   	logfile.close();
   }
 
