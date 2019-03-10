@@ -45,7 +45,7 @@ class Server : public std::enable_shared_from_this<Server> {
     logger->log(log_message);
   }
 
-  void prepare_message_for_parsing(const std::size_t bytes_transferred)
+  void prepare_message_for_parsing()
   {
     data[strlen(data)-1] = '\0';
   }
@@ -61,7 +61,7 @@ class Server : public std::enable_shared_from_this<Server> {
     
     if(bytes_transferred > 1)
     {
-      prepare_message_for_parsing(bytes_transferred);
+      prepare_message_for_parsing();
 
       if(strcmp(data, STR_BAT_VOLT) == 0)
       {
