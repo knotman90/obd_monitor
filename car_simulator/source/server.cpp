@@ -2,10 +2,12 @@
 #include <logger.h>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
 #include <iostream>
 #include <memory>
 #include <tuple>
-
+#include <server.h>
 using boost::asio::ip::tcp;
 using std::cerr;
 using std::cout;
@@ -28,6 +30,7 @@ class Server : public std::enable_shared_from_this<Server> {
     if (!err) {
       std::string s = socket.remote_endpoint().address().to_string();
       logger->log("Connected to " + s);
+    
       socket.async_read_some(
           boost::asio::buffer(data, MAX_LEN),
           boost::bind(&Server::handle_read, this,
@@ -38,12 +41,148 @@ class Server : public std::enable_shared_from_this<Server> {
     }
   }
 
+  inline void reply_and_log(const std::string & response, const std::string & log_message, boost::system::error_code & error_write_back)
+  {
+    socket.write_some(boost::asio::buffer(response.c_str(), response.size()), error_write_back);
+    logger->log(log_message);
+  }
+
+  void prepare_message_for_parsing(const std::size_t bytes_transferred)
+  {
+    data[strlen(data)-1] = '\0';
+  }
+
   void handle_read(
       const boost::system::error_code& error,  // Result of operation.
       std::size_t bytes_transferred            // Number of bytes read.
-  ) {
-    for (unsigned i = 0; i < bytes_transferred; i++) std::cout << data[i];
-    std::cout << std::endl;
+      ) 
+
+  {
+    std::string response;
+    boost::system::error_code error_write_back;
+    boost::array<char, 128> buf;
+    
+    if(bytes_transferred > 1)
+    {
+      prepare_message_for_parsing(bytes_transferred);
+
+      if(strcmp(data, STR_BAT_VOLT) == 0)
+      {
+        response = "4V";
+        reply_and_log(response, "Request for Voltage received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_PROT_NAME) == 0)
+      {
+        response = "TCP/IP";
+        reply_and_log(response, "Request for Protocol Name received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_VIN_NUM) == 0)
+      {
+        response = "123456";
+        reply_and_log(response, "Request for Vehicle Number received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_ECU_NAME) == 0)
+      {
+        response = "ECU_NAME";
+        reply_and_log(response, "Request for ECU Name received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_DTC_CNT) == 0)
+      {
+        response = "DTC_COUNT";
+        reply_and_log(response, "Request for DTC received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_SUPP_PID_1) == 0)
+      {
+        response = "STR_SUPP_PID_1";
+        reply_and_log(response, "Request for supported PIDs 1 - 32 for MODE 1", error_write_back);
+      }
+
+      else if(strcmp(data, STR_SUPP_PID_9) == 0)
+      {
+        response = "STR_SUPP_PID_9";
+        reply_and_log(response, "Request forsupported PIDs 1 - 32 for MODE 9", error_write_back);
+      }
+
+      else if(strcmp(data, STR_DTC) == 0)
+      {
+        response = "DTC_COUNT";
+        reply_and_log(response, "Request for DTCs that are set.", error_write_back);
+      }
+
+      else if(strcmp(data, STR_ENGINE_RPM) == 0)
+      {
+        response = "10000";
+        reply_and_log(response, "Request for engine rpm received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_VEHICLE_SPEED) == 0)
+      {
+        response = "100 km/hr";
+        reply_and_log(response, "Request for vehicle received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_FUEL_PRESS) == 0)
+      {
+        response = "52psi";
+        reply_and_log(response, "Request for fuel pressure received)", error_write_back);
+      }
+
+      else if(strcmp(data, STR_MAP_PRESS) == 0)
+      {
+        response = "10psi";
+        reply_and_log(response, "Request for map pressure received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_FUEL_FLOW_RATE) == 0)
+      {
+        response = "2.25";
+        reply_and_log(response, "Request for fuel flow rate received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_COOLANT_TEMP) == 0)
+      {
+        response = "10 degree celsius";
+        reply_and_log(response, "Request for coolant temperature received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_FUEL_TANK_LEV) == 0)
+      {
+        response = "50%";
+        reply_and_log(response, "Request for fuel tank level received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_INTAKE_AIR_TMP) == 0)
+      {
+        response = "23 degree celsius";
+        reply_and_log(response, "Request for air intake temperature received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_OIL_TMP) == 0)
+      {
+        response = "23 degree celsius";
+        reply_and_log(response, "Request for oil temperature received", error_write_back);
+      }
+
+      else if(strcmp(data, STR_FREEZE_FRAME_DTC) == 0)
+      {
+        response = "FREEZE_FRAME_DTC";
+        reply_and_log(response, "Request for Freeze Frame DTC received", error_write_back);
+      }
+
+
+    }
+
+    socket.async_read_some(
+      boost::asio::buffer(data, MAX_LEN),
+      boost::bind(&Server::handle_read, this,
+        boost::asio::placeholders::error,
+        boost::asio::placeholders::bytes_transferred));
+
   }
 
   tcp::socket& get_socket() { return socket; }
