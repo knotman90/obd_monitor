@@ -2,8 +2,6 @@
 #include <logger.h>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
 #include <iostream>
 #include <memory>
 #include <tuple>
@@ -60,7 +58,6 @@ class Server : public std::enable_shared_from_this<Server> {
   {
     std::string response;
     boost::system::error_code error_write_back;
-    boost::array<char, 128> buf;
     
     if(bytes_transferred > 1)
     {
